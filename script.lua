@@ -1,10 +1,11 @@
 -- ============================================================
+-- ELITE SCRIPT (FLAT RECOIL ENGINE + SINGLE-BUTTON CYCLING)
 -- OPTIMIZED FOR 5-5 SENS, DEFAULT ADVANCED SETTINGS, 84 FOV
 -- 
 -- NOTE FOR NEW OPERATORS: 
 -- Because recoil varies based on barrel attachments and vertical grip 
 -- choices, you may need to configure the 'vert' and 'horizontal' values 
--- for the newly added operators (Skopos, Deimos, Tubarao, etc.).
+-- for the operators (Skopos, Deimos, Tubarao, etc.).
 -- 
 -- HOW TO CONFIGURE:
 -- 1. Take the operator into a Custom Match or Shooting Range.
@@ -18,13 +19,12 @@
 -- FEATURE TOGGLES
 local ADS_REQUIRED        = true  
 local RECOIL_SLEEP        = 10    -- Fixed, reliable loop timing
-local BURST_PROTECTION    = true  
 
 -- LEGIT MODE SECTION
 local LEGIT_MODE          = true  
 local RANDOMNESS          = 0.30  -- Sweet spot for anti-cheat evasion
 
--- FULL OPERATOR ROSTER (Ram synced to Ash's R4-C values)
+-- FULL OPERATOR ROSTER
 local attackers = {
     { name = "Ash",     weapon = "R4-C",      vert = 34.9, horizontal = -2.10 },
     { name = "Twitch",  weapon = "F2",        vert = 40.0, horizontal = -1.80 },
@@ -41,7 +41,7 @@ local attackers = {
     { name = "Skopos",  weapon = "PCX-33",    vert = 24.5, horizontal = -0.50 },
     { name = "Ram",     weapon = "R4-C",      vert = 34.9, horizontal = -2.10 }, 
     { name = "Tubarao", weapon = "MPX",       vert = 22.0, horizontal =  0.40 },
-    { name = "Solis",   weapon = "P90",       vert = 23.0, horizontal =  0.20 }
+    { name = "Solis",   weapon = "P90",       vert = 23.0, horizontal = -0.20 }
 }
 
 local state = { op_index = 1 }
@@ -66,53 +66,53 @@ function OnEvent(event, arg)
 
     if event == "MOUSE_BUTTON_PRESSED" then
         if arg == 4 then
-            changeOperator(1)   -- Cycle forward through operators
+            changeOperator(1)   -- Cycle forward through operators using MB4
         elseif arg == 1 then
             -- FLAT RECOIL ENGINE
             local op = getOp()
             local accX, accY = 0, 0
-            local bulletTimer = 0
+            local executionTicks = 0
             
             repeat
                 local firing = IsMouseButtonPressed(1)
                 local ads    = IsMouseButtonPressed(2) or IsMouseButtonPressed(3)
                 
-                if firing and (ads or not ADS_REQUIRED) then
-                    bulletTimer = bulletTimer + 1
-                    
-                    if BURST_PROTECTION and bulletTimer < 2 then
-                        Sleep(RECOIL_SLEEP)
-                    else
-                        local current_vert       = op.vert
-                        local current_horizontal = op.horizontal
-                        
-                        -- Legit Mode Randomization (Anti-Cheat Evasion)
-                        if LEGIT_MODE then
-                            local randX = (math.random() * 2 - 1) * RANDOMNESS
-                            local randY = (math.random() * 2 - 1) * RANDOMNESS
-                            current_horizontal   = current_horizontal + randX
-                            current_vert         = current_vert + randY
-                        end
-                        
-                        accX = accX + current_horizontal
-                        accY = accY + current_vert
-                        
-                        local mX = math.floor(accX + 0.5)
-                        local mY = math.floor(accY + 0.5)
-                        
-                        accX = accX - mX
-                        accY = accY - mY
-
-                        if mX ~= 0 or mY ~= 0 then 
-                            MoveMouseRelative(mX, mY) 
-                        end
-                        
-                        Sleep(RECOIL_SLEEP)
-                    end
-                else
+                -- Instant cutoff: if firing stops or ADS drops, break loop immediately
+                if not firing or (ADS_REQUIRED and not ads) then
                     break
                 end
-            until not IsMouseButtonPressed(1)
+                
+                executionTicks = executionTicks + 1
+                
+                -- Buffer the first tick completely so single-clicks/taps have zero pull
+                if executionTicks > 1 then
+                    local current_vert       = op.vert
+                    local current_horizontal = op.horizontal
+                    
+                    -- Legit Mode Randomization (Anti-Cheat Evasion)
+                    if LEGIT_MODE then
+                        local randX = (math.random() * 2 - 1) * RANDOMNESS
+                        local randY = (math.random() * 2 - 1) * RANDOMNESS
+                        current_horizontal   = current_horizontal + randX
+                        current_vert         = current_vert + randY
+                    end
+                    
+                    accX = accX + current_horizontal
+                    accY = accY + current_vert
+                    
+                    local mX = math.floor(accX + 0.5)
+                    local mY = math.floor(accY + 0.5)
+                    
+                    accX = accX - mX
+                    accY = accY - mY
+
+                    if mX ~= 0 or mY ~= 0 then 
+                        MoveMouseRelative(mX, mY) 
+                    end
+                end
+                
+                Sleep(RECOIL_SLEEP)
+            until false
         end
     end
 end
