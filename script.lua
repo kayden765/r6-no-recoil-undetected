@@ -15,12 +15,17 @@
 --    (positive numbers pull right, negative numbers pull left).
 -- ============================================================
 
-local ADS_REQUIRED    = true
-local RECOIL_SLEEP    = 10  -- dont change this unless you know how to optimize settings
-local LEGIT_MODE      = true -- Randomizes spray patterns for anti-cheat evasion
-local RANDOMNESS      = 0.30 -- Higher = safer but worse recoil control (sweet spot: 0.35-0.75)
+-- SETTINGS
+local ADS_REQUIRED        = true  -- Only pull down when fully zoomed in (true/false)
+local RECOIL_SLEEP        = 10    -- dont change this unless you know how to optimize settings
+local BURST_PROTECTION    = true  -- Prevents downward throw if tap-firing or short-bursting (true/false)
+local STANCE_SCALING      = true  -- Scales recoil down slightly when crouched (true/false)
+local ATTACHMENT_MOD      = false -- Adjusts horizontal pull for alternate barrel attachments (true/false)
 
--- Clean operator table using straight vertical and horizontal pulls
+-- LEGIT MODE SECTION
+local LEGIT_MODE          = true  -- Randomizes spray patterns for anti-cheat evasion
+local RANDOMNESS          = 0.30  -- Higher = safer but worse recoil control (sweet spot: 0.35-0.75)
+
 local attackers = {
     { 
         name       = "Ash", 
@@ -99,7 +104,6 @@ local attackers = {
         vert       = 20.0,   
         horizontal =  3.00,
     },
-    -- New / Recent Operators (Configurable)
     { 
         name       = "Deimos", 
         weapon     = "AK-74M", 
@@ -148,11 +152,15 @@ local function getOp()
     return attackers[i]
 end
 
-local function nextOperator()
-    state.op_index = state.op_index + 1
-    if state.op_index > #attackers then state.op_index = 1 end
-    local op = getOp()
+local function changeOperator(direction)
+    state.op_index = state.op_index + direction
+    if state.op_index > #attackers then 
+        state.op_index = 1 
+    elseif state.op_index < 1 then 
+        state.op_index = #attackers 
+    end
     
+    local op = getOp()
     OutputLogMessage("\n========================================\n")
     OutputLogMessage(" >>> ACTIVE OPERATOR [%d/%d]: %s (%s) [RPM: %d] <<<\n", state.op_index, #attackers, op.name, op.weapon, op.rpm)
     OutputLogMessage("========================================\n")
@@ -164,38 +172,55 @@ local function doRecoil()
     state.rcs_running = true
     
     local accX, accY = 0, 0
+    local bulletTimer = 0
     
     repeat
         local firing = IsMouseButtonPressed(1)
         local ads    = IsMouseButtonPressed(2) or IsMouseButtonPressed(3)
         
         if firing and (ads or not ADS_REQUIRED) and IsKeyLockOn("Capslock") then
-            local current_vert       = op.vert
-            local current_horizontal = op.horizontal
+            bulletTimer = bulletTimer + 1
             
-            if LEGIT_MODE then
-                local randX          = (math.random() * 2 - 1) * RANDOMNESS
-                local randY          = (math.random() * 2 - 1) * RANDOMNESS
-                current_horizontal   = current_horizontal + randX
-                current_vert         = current_vert + randY
-            end
-            
-            accX = accX + current_horizontal
-            accY = accY + current_vert
-            
-            local mX = math.floor(accX + 0.5)
-            local mY = math.floor(accY + 0.5)
-            
-            accX = accX - mX
-            accY = accY - mY
+            if BURST_PROTECTION and bulletTimer < 2 then
+                Sleep(RECOIL_SLEEP)
+            else
+                local current_vert       = op.vert
+                local current_horizontal = op.horizontal
+                
+                if STANCE_SCALING and IsModifierPressed("lctrl") then
+                    current_vert       = current_vert * 0.85
+                    current_horizontal = current_horizontal * 0.85
+                end
+                
+                if ATTACHMENT_MOD then
+                    current_horizontal = current_horizontal * 0.90
+                end
+                
+                if LEGIT_MODE then
+                    local randX          = (math.random() * 2 - 1) * RANDOMNESS
+                    local randY          = (math.random() * 2 - 1) * RANDOMNESS
+                    current_horizontal   = current_horizontal + randX
+                    current_vert         = current_vert + randY
+                end
+                
+                accX = accX + current_horizontal
+                accY = accY + current_vert
+                
+                local mX = math.floor(accX + 0.5)
+                local mY = math.floor(accY + 0.5)
+                
+                accX = accX - mX
+                accY = accY - mY
 
-            if mX ~= 0 or mY ~= 0 then 
-                MoveMouseRelative(mX, mY) 
+                if mX ~= 0 or mY ~= 0 then 
+                    MoveMouseRelative(mX, mY) 
+                end
+                
+                Sleep(RECOIL_SLEEP)
             end
-            
-            Sleep(RECOIL_SLEEP)
         else
             accX, accY = 0, 0
+            bulletTimer = 0
             Sleep(10)
         end
     until not IsMouseButtonPressed(1) or not IsKeyLockOn("Capslock")
@@ -209,12 +234,13 @@ function OnEvent(event, arg)
         return
     end
 
-    if event == "MOUSE_BUTTON_PRESSED" and arg == 4 then
-        nextOperator()
-        return
-    end
-
-    if event == "MOUSE_BUTTON_PRESSED" and arg == 1 then
-        doRecoil()
+    if event == "MOUSE_BUTTON_PRESSED" then
+        if arg == 4 then
+            changeOperator(1)  
+        elseif arg == 5 then
+            changeOperator(-1) 
+        elseif arg == 1 then
+            doRecoil()
+        end
     end
 end
