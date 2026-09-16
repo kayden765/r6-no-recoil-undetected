@@ -1,32 +1,34 @@
-# r6-no-recoil-undetected
-# R6S Logitech G HUB Recoil Script
+Elite Logitech G HUB R6S Anti-Recoil Engine
+A streamlined, high-performance Lua anti-recoil and operator-switching script built specifically for Logitech G HUB and Rainbow Six Siege.
 
-Optimized anti-recoil script for Rainbow Six Siege.
+Features
+Flat Recoil Engine: Clean, reliable recoil compensation engine optimized for default advanced settings, 5-5 sensitivity, and 84 FOV.
 
-How Anti-Detection Works
-Standard scripts draw the exact same path every time, which anti-cheat systems easily flag. Legit Mode injects random math adjustments on every tick. This breaks the pixel signature so no two sprays are identical, mimicking real human hand movement.
+Legit Mode Randomization: Built-in pixel randomization to bypass anti-cheat.
 
-Installation
-Open Logitech G HUB and go to your script profile.
+Caps Lock Safety Toggle: The script remains completely dormant unless your Caps Lock key is physically toggled ON.
 
-Paste the code and save.
+Single-Button Operator Cycling: Easily cycle through the full operator roster on the fly using Mouse Button 4 (MB4).
 
-Turn Caps Lock ON, hold ADS (Right Click), and fire. Use MB4 to change operators.
+Configuration & Tuning Notes
+-- OPTIMIZED FOR 5-5 SENS, DEFAULT ADVANCED SETTINGS, 84 FOV
+-- NOTE FOR NEW OPERATORS:
+-- Because recoil varies based on barrel attachments and vertical grip
+-- choices, you may need to configure the 'vert' and 'horizontal' values
+-- for the operators (Skopos, Deimos, Tubarao, etc.).
+-- HOW TO CONFIGURE:
+-- 1. Take the operator into a Custom Match or Shooting Range.
+-- 2. Shoot a full mag at a wall without moving your mouse.
+-- 3. If your crosshair drifts too high, increase the 'vert' value slightly.
+--    If it pulls too low, decrease the 'vert' value.
+-- 4. If your crosshair drifts left/right, adjust the 'horizontal' value
+--    (positive numbers pull right, negative numbers pull left).
 
-## Settings & Requirements
-- **Sensitivity:** 5-5 (Default advanced settings)
-- **FOV:** 84
-- **Master Switch:** Caps Lock (Must be ON)
+Controls Reference
+Caps Lock ON: Enables script execution.
 
-## Features
-- **Instant Recoil:** Pulls down immediately on bullet 1.
-- **Operator Swap:** Press **MB4** to cycle through Ash (R4-C), Twitch (F2), and Mute (SMG-11).
-- **Slow Walk Fix:** Works smoothly while holding Left Alt.
-- **Legit Mode:** Randomizes spray paths to prevent detection.
+Caps Lock OFF: Completely disables all script functions.
 
-## Configuration
-```lua
-local ADS_REQUIRED    = true
-local RECOIL_SLEEP    = 10  -- dont change this unless you know how to optimize settings
-local LEGIT_MODE      = true -- Randomizes spray patterns for anti-cheat evasion
-local RANDOMNESS      = 0.25 -- Higher = safer from detection, but worse recoil control (sweet spot: 0.35-0.75; over 0.75 for legit looking recoil)
+Mouse Button 4 (MB4): Cycles forward through the operator roster (notifies active operator via the G HUB scripting log).
+
+Left-Click (arg == 1 + ADS): Executes flat anti-recoil compensation with Legit Mode randomness.
