@@ -1,5 +1,5 @@
 -- ============================================================
--- Optimized for 5-5 sens, default advanced settings, 84 FOV
+-- OPTIMIZED FOR 5-5 SENS, DEFAULT ADVANCED SETTINGS, 84 FOV
 -- 
 -- NOTE FOR NEW OPERATORS: 
 -- Because recoil varies based on barrel attachments and vertical grip 
@@ -17,10 +17,12 @@
 
 -- SETTINGS
 local ADS_REQUIRED        = true  -- Only pull down when fully zoomed in (true/false)
-local RECOIL_SLEEP        = 10    -- dont change this unless you know how to optimize settings
+local RECOIL_SLEEP        = 10    -- Fallback sleep timing if dynamic sync is disabled
+local DYNAMIC_RPM_SYNC    = true  -- Automatically syncs pull speed to each operator's weapon RPM (true/false)
 local BURST_PROTECTION    = true  -- Prevents downward throw if tap-firing or short-bursting (true/false)
 local STANCE_SCALING      = true  -- Scales recoil down slightly when crouched (true/false)
 local ATTACHMENT_MOD      = false -- Adjusts horizontal pull for alternate barrel attachments (true/false)
+local PROGRESSIVE_RECOIL  = true  -- Applies multi-stage multipliers for first-shot kick control (true/false)
 
 -- LEGIT MODE SECTION
 local LEGIT_MODE          = true  -- Randomizes spray patterns for anti-cheat evasion
@@ -174,6 +176,11 @@ local function doRecoil()
     local accX, accY = 0, 0
     local bulletTimer = 0
     
+    local current_sleep = RECOIL_SLEEP
+    if DYNAMIC_RPM_SYNC and op.rpm and op.rpm > 0 then
+        current_sleep = math.floor((60000 / op.rpm) + 0.5)
+    end
+    
     repeat
         local firing = IsMouseButtonPressed(1)
         local ads    = IsMouseButtonPressed(2) or IsMouseButtonPressed(3)
@@ -182,10 +189,21 @@ local function doRecoil()
             bulletTimer = bulletTimer + 1
             
             if BURST_PROTECTION and bulletTimer < 2 then
-                Sleep(RECOIL_SLEEP)
+                Sleep(current_sleep)
             else
                 local current_vert       = op.vert
                 local current_horizontal = op.horizontal
+                
+                -- Progressive multi-stage curve for first-shot kick and mid-spray stability
+                if PROGRESSIVE_RECOIL then
+                    if bulletTimer <= 3 then
+                        current_vert = current_vert * 1.25  -- Crushes initial first-shot kick
+                    elseif bulletTimer <= 15 then
+                        current_vert = current_vert * 1.00  -- Smooth sustained spray curve
+                    else
+                        current_vert = current_vert * 0.90  -- Eases off near end of magazine
+                    end
+                end
                 
                 if STANCE_SCALING and IsModifierPressed("lctrl") then
                     current_vert       = current_vert * 0.85
@@ -216,7 +234,7 @@ local function doRecoil()
                     MoveMouseRelative(mX, mY) 
                 end
                 
-                Sleep(RECOIL_SLEEP)
+                Sleep(current_sleep)
             end
         else
             accX, accY = 0, 0
