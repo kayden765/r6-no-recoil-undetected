@@ -1,30 +1,140 @@
 -- ============================================================
 -- Optimized for 5-5 sens, default advanced settings, 84 FOV
+-- 
+-- NOTE FOR NEW OPERATORS: 
+-- Because recoil varies based on barrel attachments and vertical grip 
+-- choices, you may need to configure the 'vert' and 'horizontal' values 
+-- for the newly added operators (Skopos, Deimos, Tubarao, etc.).
+-- 
+-- HOW TO CONFIGURE:
+-- 1. Take the operator into a Custom Match or Shooting Range.
+-- 2. Shoot a full mag at a wall *without* moving your mouse.
+-- 3. If your crosshair drifts too high, increase the 'vert' value slightly.
+--    If it pulls too low, decrease the 'vert' value.
+-- 4. If your crosshair drifts left/right, adjust the 'horizontal' value 
+--    (positive numbers pull right, negative numbers pull left).
 -- ============================================================
+
 local ADS_REQUIRED    = true
 local RECOIL_SLEEP    = 10  -- dont change this unless you know how to optimize settings
 local LEGIT_MODE      = true -- Randomizes spray patterns for anti-cheat evasion
-local RANDOMNESS      = 0.50 -- Higher = safer but worse recoil control (sweet spot: 0.35-0.75)
+local RANDOMNESS      = 0.30 -- Higher = safer but worse recoil control (sweet spot: 0.35-0.75)
 
+-- Clean operator table using straight vertical and horizontal pulls
 local attackers = {
     { 
-        name   = "Ash", 
-        weapon = "R4-C", 
-        vert   = 34.9,   
-        h      = -2.10,  
+        name       = "Ash", 
+        weapon     = "R4-C", 
+        rpm        = 860,
+        vert       = 34.9,   
+        horizontal = -2.10,
     },
     { 
-        name   = "Twitch", 
-        weapon = "F2", 
-        vert   = 40.0,   
-        h      = -1.8,   
+        name       = "Twitch", 
+        weapon     = "F2", 
+        rpm        = 980,
+        vert       = 40.0,   
+        horizontal = -1.80,
     },
     { 
-        name   = "Mute", 
-        weapon = "SMG-11", 
-        vert   = 20.0,   
-        h      =  3.00,    
+        name       = "Ying", 
+        weapon     = "T-95 LSW", 
+        rpm        = 650,
+        vert       = 27.5,   
+        horizontal =  0.80,
     },
+    { 
+        name       = "Hibana", 
+        weapon     = "Type-89", 
+        rpm        = 850,
+        vert       = 32.0,   
+        horizontal = -1.50,
+    },
+    { 
+        name       = "Jager", 
+        weapon     = "416-C", 
+        rpm        = 740,
+        vert       = 31.0,   
+        horizontal =  1.10,
+    },
+    { 
+        name       = "Warden", 
+        weapon     = "MPX", 
+        rpm        = 800,
+        vert       = 22.0,   
+        horizontal =  0.40,
+    },
+    { 
+        name       = "Mira", 
+        weapon     = "Vector .45 ACP", 
+        rpm        = 1200,
+        vert       = 19.5,   
+        horizontal =  1.20,
+    },
+    { 
+        name       = "Goyo", 
+        weapon     = "Vector .45 ACP", 
+        rpm        = 1200,
+        vert       = 19.5,   
+        horizontal =  1.20,
+    },
+    { 
+        name       = "Doc", 
+        weapon     = "MP5", 
+        rpm        = 800,
+        vert       = 21.0,   
+        horizontal = -0.50,
+    },
+    { 
+        name       = "Bandit", 
+        weapon     = "MP7", 
+        rpm        = 900,
+        vert       = 25.0,   
+        horizontal = -0.90,
+    },
+    { 
+        name       = "Mute", 
+        weapon     = "SMG-11", 
+        rpm        = 1270,
+        vert       = 20.0,   
+        horizontal =  3.00,
+    },
+    -- New / Recent Operators (Configurable)
+    { 
+        name       = "Deimos", 
+        weapon     = "AK-74M", 
+        rpm        = 650,
+        vert       = 26.0,   
+        horizontal =  1.00,
+    },
+    { 
+        name       = "Skopos", 
+        weapon     = "PCX-33", 
+        rpm        = 780,
+        vert       = 24.5,   
+        horizontal = -0.50,
+    },
+    { 
+        name       = "Ram", 
+        weapon     = "R4-C / LMG", 
+        rpm        = 780,
+        vert       = 28.0,   
+        horizontal = -1.20,
+    },
+    { 
+        name       = "Tubarao", 
+        weapon     = "MPX", 
+        rpm        = 800,
+        vert       = 22.0,   
+        horizontal =  0.40,
+    },
+    { 
+        name       = "Solis", 
+        weapon     = "P90", 
+        rpm        = 970,
+        vert       = 23.0,   
+        horizontal =  0.20,
+    }
 }
 
 local state = {
@@ -42,7 +152,10 @@ local function nextOperator()
     state.op_index = state.op_index + 1
     if state.op_index > #attackers then state.op_index = 1 end
     local op = getOp()
-    OutputLogMessage(string.format("[R6S RCS] Switched Operator to: %s (%s)\n", op.name, op.weapon))
+    
+    OutputLogMessage("\n========================================\n")
+    OutputLogMessage(" >>> ACTIVE OPERATOR [%d/%d]: %s (%s) [RPM: %d] <<<\n", state.op_index, #attackers, op.name, op.weapon, op.rpm)
+    OutputLogMessage("========================================\n")
 end
 
 local function doRecoil()
@@ -57,17 +170,17 @@ local function doRecoil()
         local ads    = IsMouseButtonPressed(2) or IsMouseButtonPressed(3)
         
         if firing and (ads or not ADS_REQUIRED) and IsKeyLockOn("Capslock") then
-            local current_vert = op.vert
-            local current_h    = op.h
+            local current_vert       = op.vert
+            local current_horizontal = op.horizontal
             
             if LEGIT_MODE then
-                local randX = (math.random() * 2 - 1) * RANDOMNESS
-                local randY = (math.random() * 2 - 1) * RANDOMNESS
-                current_h    = current_h + randX
-                current_vert = current_vert + randY
+                local randX          = (math.random() * 2 - 1) * RANDOMNESS
+                local randY          = (math.random() * 2 - 1) * RANDOMNESS
+                current_horizontal   = current_horizontal + randX
+                current_vert         = current_vert + randY
             end
             
-            accX = accX + current_h
+            accX = accX + current_horizontal
             accY = accY + current_vert
             
             local mX = math.floor(accX + 0.5)
@@ -83,7 +196,7 @@ local function doRecoil()
             Sleep(RECOIL_SLEEP)
         else
             accX, accY = 0, 0
-            Sleep(15)
+            Sleep(10)
         end
     until not IsMouseButtonPressed(1) or not IsKeyLockOn("Capslock")
     state.rcs_running = false
