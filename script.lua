@@ -1,5 +1,4 @@
 -- ============================================================
--- ELITE SCRIPT (FLAT RECOIL ENGINE + SINGLE-BUTTON CYCLING)
 -- OPTIMIZED FOR 5-5 SENS, DEFAULT ADVANCED SETTINGS, 84 FOV
 -- 
 -- NOTE FOR NEW OPERATORS: 
