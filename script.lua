@@ -76,19 +76,19 @@ function OnEvent(event, arg)
                 local firing = IsMouseButtonPressed(1)
                 local ads    = IsMouseButtonPressed(2) or IsMouseButtonPressed(3)
                 
-                -- Instant cutoff: if firing stops or ADS drops, break loop immediately
+               
                 if not firing or (ADS_REQUIRED and not ads) then
                     break
                 end
                 
                 executionTicks = executionTicks + 1
                 
-                -- Buffer the first tick completely so single-clicks/taps have zero pull
+           
                 if executionTicks > 1 then
                     local current_vert       = op.vert
                     local current_horizontal = op.horizontal
                     
-                    -- Legit Mode Randomization (Anti-Cheat Evasion)
+                    
                     if LEGIT_MODE then
                         local randX = (math.random() * 2 - 1) * RANDOMNESS
                         local randY = (math.random() * 2 - 1) * RANDOMNESS
