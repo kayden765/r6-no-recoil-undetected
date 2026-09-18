@@ -13,15 +13,25 @@
 --    If it pulls too low, decrease the 'vert' value.
 -- 4. If your crosshair drifts left/right, adjust the 'horizontal' value 
 --    (positive numbers pull right, negative numbers pull left).
--- ============================================================
+---------------------------------------------------------------------------
+-- HOW TO CONFIGURE BULLET RAMPING:
+-- 1. Set ENABLE_RAMPING = true
+-- 2. Set RAMP_DELAY_MS to the number of milliseconds of heavy initial kick (e.g., 250)
+-- 3. Adjust FIRST_SHOT_RAMP: Increase if shots fly UP; decrease if they pull DOWN.
 
 -- FEATURE TOGGLES
 local ADS_REQUIRED        = true  
-local RECOIL_SLEEP        = 10    -- Fixed, reliable loop timing
+local RECOIL_SLEEP        = 10    --  reliable loop timing
 
 -- LEGIT MODE SECTION
-local LEGIT_MODE          = true  
-local RANDOMNESS          = 0.30  -- Sweet spot for anti-cheat evasion
+local LEGIT_MODE          = true -- true = randomized human patterns (safe), false = perfect recoil (risky)
+local RANDOMNESS          = 0.30  -- Anti-cheat evasion (0.30 - 0.80 is the sweet spot)
+
+-- PROGRESSIVE RAMPING SETTINGS (Delay Customization)
+local ENABLE_RAMPING      = false  -- true = fixes first bullet kick, false = basic control (easier to configure)
+
+local RAMP_DELAY_MS       = 250   -- How many milliseconds get extra compensation (if enabled)
+local FIRST_SHOT_RAMP     = 1.35  -- Multiplier for those first bullets (e.g 1.35 = 35% stronger pull)
 
 -- FULL OPERATOR ROSTER
 local attackers = {
@@ -65,30 +75,41 @@ function OnEvent(event, arg)
 
     if event == "MOUSE_BUTTON_PRESSED" then
         if arg == 4 then
-            changeOperator(1)   -- Cycle forward through operators using MB4
+            changeOperator(1)   -- Cycle FORWARD using Mouse Button 4
+        elseif arg == 5 then
+            changeOperator(-1)  -- Cycle BACKWARD using Mouse Button 5
         elseif arg == 1 then
-            -- FLAT RECOIL ENGINE
+            -- ADVANCED RECOIL ENGINE
             local op = getOp()
             local accX, accY = 0, 0
             local executionTicks = 0
+            
+            -- Dynamic calculation: Converts millisecond delay into macro loop ticks
+            local max_ramp_ticks = 0
+            if ENABLE_RAMPING then
+                max_ramp_ticks = math.ceil(RAMP_DELAY_MS / RECOIL_SLEEP)
+            end
             
             repeat
                 local firing = IsMouseButtonPressed(1)
                 local ads    = IsMouseButtonPressed(2) or IsMouseButtonPressed(3)
                 
-               
                 if not firing or (ADS_REQUIRED and not ads) then
                     break
                 end
                 
                 executionTicks = executionTicks + 1
                 
-           
                 if executionTicks > 1 then
                     local current_vert       = op.vert
                     local current_horizontal = op.horizontal
                     
+                    -- PROGRESSIVE BULLET-BASED RAMPING SYSTEM (Only triggers if ENABLE_RAMPING is true)
+                    if ENABLE_RAMPING and (executionTicks <= max_ramp_ticks) then
+                        current_vert = current_vert * FIRST_SHOT_RAMP
+                    end
                     
+                    -- LEGIT MODE / RANDOMIZATION
                     if LEGIT_MODE then
                         local randX = (math.random() * 2 - 1) * RANDOMNESS
                         local randY = (math.random() * 2 - 1) * RANDOMNESS
