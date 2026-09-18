@@ -1,10 +1,10 @@
 -- ============================================================
 -- OPTIMIZED FOR 5-5 SENS, DEFAULT ADVANCED SETTINGS, 84 FOV
 -- 
--- NOTE FOR NEW OPERATORS: 
+-- NOTE FOR OPERATORS: 
 -- Because recoil varies based on barrel attachments and vertical grip 
 -- choices, you may need to configure the 'vert' and 'horizontal' values 
--- for the operators (Skopos, Deimos, Tubarao, etc.).
+-- for the operators below.
 -- 
 -- HOW TO CONFIGURE:
 -- 1. Take the operator into a Custom Match or Shooting Range.
@@ -21,26 +21,15 @@ local RECOIL_SLEEP        = 10    -- Fixed, reliable loop timing
 
 -- LEGIT MODE SECTION
 local LEGIT_MODE          = true  
-local RANDOMNESS          = 0.30  -- Sweet spot for anti-cheat evasion
+local RANDOMNESS          = 0.30  --  (0.30-0.80) Sweet spot for anti-cheat evasion
 
--- FULL OPERATOR ROSTER
+-- STREAMLINED OPERATOR ROSTER (Ash, Twitch, Mute, Doc, Goyo)
 local attackers = {
     { name = "Ash",     weapon = "R4-C",      vert = 34.9, horizontal = -2.10 },
     { name = "Twitch",  weapon = "F2",        vert = 40.0, horizontal = -1.80 },
-    { name = "Ying",    weapon = "T-95 LSW",  vert = 27.5, horizontal =  0.80 },
-    { name = "Hibana",  weapon = "Type-89",   vert = 32.0, horizontal = -1.50 },
-    { name = "Jager",   weapon = "416-C",     vert = 31.0, horizontal =  1.10 },
-    { name = "Warden",  weapon = "MPX",       vert = 22.0, horizontal =  0.40 },
-    { name = "Mira",    weapon = "Vector .45",vert = 19.5, horizontal =  1.20 },
-    { name = "Goyo",    weapon = "Vector .45",vert = 19.5, horizontal =  1.20 },
-    { name = "Doc",     weapon = "MP5",       vert = 21.0, horizontal = -0.50 },
-    { name = "Bandit",  weapon = "MP7",       vert = 25.0, horizontal = -0.90 },
     { name = "Mute",    weapon = "SMG-11",    vert = 20.0, horizontal =  3.00 },
-    { name = "Deimos",  weapon = "AK-74M",    vert = 26.0, horizontal =  1.00 },
-    { name = "Skopos",  weapon = "PCX-33",    vert = 24.5, horizontal = -0.50 },
-    { name = "Ram",     weapon = "R4-C",      vert = 34.9, horizontal = -2.10 }, 
-    { name = "Tubarao", weapon = "MPX",       vert = 22.0, horizontal =  0.40 },
-    { name = "Solis",   weapon = "P90",       vert = 23.0, horizontal = -0.20 }
+    { name = "Doc",     weapon = "MP5",       vert = 21.0, horizontal = -0.50 },
+    { name = "Goyo",    weapon = "Vector .45",vert = 19.5, horizontal =  1.20 }
 }
 
 local state = { op_index = 1 }
@@ -70,7 +59,6 @@ function OnEvent(event, arg)
             -- FLAT RECOIL ENGINE
             local op = getOp()
             local accX, accY = 0, 0
-            local executionTicks = 0
             
             repeat
                 local firing = IsMouseButtonPressed(1)
@@ -81,33 +69,28 @@ function OnEvent(event, arg)
                     break
                 end
                 
-                executionTicks = executionTicks + 1
+                local current_vert       = op.vert
+                local current_horizontal = op.horizontal
                 
-                -- Buffer the first tick completely so single-clicks/taps have zero pull
-                if executionTicks > 1 then
-                    local current_vert       = op.vert
-                    local current_horizontal = op.horizontal
-                    
-                    -- Legit Mode Randomization (Anti-Cheat Evasion)
-                    if LEGIT_MODE then
-                        local randX = (math.random() * 2 - 1) * RANDOMNESS
-                        local randY = (math.random() * 2 - 1) * RANDOMNESS
-                        current_horizontal   = current_horizontal + randX
-                        current_vert         = current_vert + randY
-                    end
-                    
-                    accX = accX + current_horizontal
-                    accY = accY + current_vert
-                    
-                    local mX = math.floor(accX + 0.5)
-                    local mY = math.floor(accY + 0.5)
-                    
-                    accX = accX - mX
-                    accY = accY - mY
+                -- Legit Mode Randomization (Anti-Cheat Evasion)
+                if LEGIT_MODE then
+                    local randX = (math.random() * 2 - 1) * RANDOMNESS
+                    local randY = (math.random() * 2 - 1) * RANDOMNESS
+                    current_horizontal   = current_horizontal + randX
+                    current_vert         = current_vert + randY
+                end
+                
+                accX = accX + current_horizontal
+                accY = accY + current_vert
+                
+                local mX = math.floor(accX + 0.5)
+                local mY = math.floor(accY + 0.5)
+                
+                accX = accX - mX
+                accY = accY - mY
 
-                    if mX ~= 0 or mY ~= 0 then 
-                        MoveMouseRelative(mX, mY) 
-                    end
+                if mX ~= 0 or mY ~= 0 then 
+                    MoveMouseRelative(mX, mY) 
                 end
                 
                 Sleep(RECOIL_SLEEP)
