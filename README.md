@@ -14,7 +14,7 @@ An advanced, lightweight Lua script optimized for **5-5 Sensitivity and 84 FOV**
 
 ## 🎥 Video Setup & Showcase
 For a live pattern demonstration and a step-by-step installation guide, watch the full video:
-👉 **[WATCH THE TUTORIAL HERE](https://www.youtube.com/watch?v=MRpaDyaZKU8)**
+👉 **[WATCH THE TUTORIAL HERE](https://www.youtube.com/watch?v=OXSRYlvN44A)**
 
 ---
 
