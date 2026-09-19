@@ -1,3 +1,16 @@
+-- ███████╗██╗   ██╗ ██████╗██╗  ██╗    ███████╗██╗███████╗ ██████╗ ███████╗
+-- ██╔════╝██║   ██║██╔════╝██║ ██╔╝    ██╔════╝██║██╔════╝██╔════╝ ██╔════╝
+-- █████╗  ██║   ██║██║     █████╔╝     ███████╗██║█████╗  ██║  ███╗█████╗  
+-- ██╔══╝  ██║   ██║██║     ██╔═██╗     ╚════██║██║██╔══╝  ██║   ██║██╔══╝  
+-- ██║     ╚██████╔╝╚██████╗██║  ██╗    ███████║██║███████╗╚██████╔╝███████╗
+-- ╚═╝      ╚═════╝  ╚═════╝╚═╝  ╚═╝    ╚══════╝╚═╝╚══════╝ ╚═════╝ ╚══════╝
+-- ============================================================
+-- 📱 DISCORD: [ https://discord.gg/C7Y8TrEyA ]
+-- ============================================================
+--          | |
+--          | |
+--          \ /
+--           v
 -- ============================================================
 -- OPTIMIZED FOR 5-5 SENS, DEFAULT ADVANCED SETTINGS, 84 FOV
 -- 
@@ -41,11 +54,11 @@ local attackers = {
     { name = "Hibana",  weapon = "Type-89",   vert = 32.0, horizontal = -1.50 },
     { name = "Jager",   weapon = "416-C",     vert = 31.0, horizontal =  1.10 },
     { name = "Warden",  weapon = "MPX",       vert = 22.0, horizontal =  0.40 },
-    { name = "Mira",    weapon = "Vector .45",vert = 19.5, horizontal =  1.20 },
-    { name = "Goyo",    weapon = "Vector .45",vert = 19.5, horizontal =  1.20 },
-    { name = "Doc",     weapon = "MP5",       vert = 21.0, horizontal = -0.50 },
+    { name = "Mira",    weapon = "Vector .45",vert = 14.5, horizontal =  0.00 },
+    { name = "Goyo",    weapon = "Vector .45",vert = 14.5, horizontal =  0.00 },
+    { name = "Doc",     weapon = "MP5",       vert = 11.0, horizontal = -0.50 },
     { name = "Bandit",  weapon = "MP7",       vert = 25.0, horizontal = -0.90 },
-    { name = "Mute",    weapon = "SMG-11",    vert = 20.0, horizontal =  3.00 },
+    { name = "Mute",    weapon = "SMG-11",    vert = 21.0, horizontal =  1.50 },
     { name = "Deimos",  weapon = "AK-74M",    vert = 26.0, horizontal =  1.00 },
     { name = "Skopos",  weapon = "PCX-33",    vert = 24.5, horizontal = -0.50 },
     { name = "Ram",     weapon = "R4-C",      vert = 34.9, horizontal = -2.10 }, 
